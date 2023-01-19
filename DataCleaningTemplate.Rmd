@@ -1,0 +1,426 @@
+---
+title: "Questioning and Cleaning the Body-Fat Data"
+output: 
+  bookdown::html_document2: 
+    highlight: espresso
+    theme: spacelab
+author: "Your Name Here"
+date: 'Last compiled: `r format(Sys.time(), "%B %d, %Y")`'
+bibliography: 
+  - packages.bib
+  - bmiL.bib
+  - BMI.bib
+css: MyLab.css
+---
+
+```{r label = "setup", include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center", comment = NA, message = FALSE, warning = FALSE)
+```
+
+```{r, results = "hide", echo = FALSE, message = FALSE}
+PackagesUsed <- c("tidyverse", "caret", "rpart", "rmarkdown", "bookdown", 
+                  "plotly", "ggplot2", "knitr", "glmnet", "dplyr",
+                  "data.table", "MASS", "caretEnsemble", "ranger",
+                  "randomForest", "leaps", "corrplot","GGally", "mfp", 
+                  "partykit", "gbm", "RANN", "e1071", "rpart.plot")
+knitr::write_bib(PackagesUsed, file = "./packages.bib")
+```
+
+____________________
+
+In the article _Fitting Percentage of Body Fat to Simple Body Measurements_, @johnson_fitting_1996 uses the data at [http://jse.amstat.org/datasets/fat.dat.txt](http://jse.amstat.org/datasets/fat.dat.txt) provided to him by Dr. A. Garth Fischer in a personal communication on October 5, 1994, as a multiple linear regression activity with his students.  A subset of the variables at [http://jse.amstat.org/datasets/fat.dat.txt](http://jse.amstat.org/datasets/fat.dat.txt) is available in the R package **mfp** by @R-mfp and the data set is used frequently in the text _Statistical Regression and Classification_ by @matloff_statistical_2017.  
+
+The purpose of this activity is to have the reader critically question, evaluate, and clean the original data provided at [http://jse.amstat.org/datasets/fat.dat.txt](http://jse.amstat.org/datasets/fat.dat.txt).  The guided activities will reinforce reading data into R using the `fread()` function from the **data.table** package written by @R-data.table, creating graphs with both packages **ggplot2** and **plotly** written by @R-ggplot2 and @R-plotly, respectively, and creating new variables with functions such as `mutate()` from the **dplyr** package written by @R-dplyr.     
+
+____________________
+
+<div id="instructions">
+Type complete sentences to answer all questions inside the `answer` tags provided in the R Markdown document.  Round all numeric answers you report inside the answer tags to four decimal places.  Use inline `R` code to report numeric answers inside the `answer` tags (i.e. do not hard code your numeric answers).
+
+The article by @johnson_fitting_1996 defines body-fat determined with the brozek and siri methods as well as fat free weight using Equations  \@ref(eq:brozek), \@ref(eq:siri), and \@ref(eq:fatfree), respectively.
+
+\begin{equation}
+\text{bodyfatBrozek} = \frac{457}{\text{density}} - 414.2
+(\#eq:brozek)
+\end{equation}
+
+\begin{equation}
+\text{bodyfatSiri} = \frac{495}{\text{density}} - 450
+(\#eq:siri)
+\end{equation}
+
+\begin{equation}
+\text{FatFreeWeight} = \left(1 -\frac{\text{brozek}}{100}\times \text{weight_lbs}\right)
+(\#eq:fatfree)
+\end{equation}
+Body Mass Index (`BMI`) is defined in Equation \@ref(eq:BMI). 
+
+\begin{equation}
+\text{BMI} = \frac{\text{kg}}{\text{m}^2}
+(\#eq:BMI)
+\end{equation}
+
+Please use the following conversion factors with this project: 0.453592 kilos per pound and 2.54 centimeters per inch.
+
+For example, a male who weighs 185 pounds and is 71 inches tall has a weight of 83.91 kg and a height of 1.8034 m.
+
+\begin{equation}
+185 \text{ pounds} \times \frac{0.453592 \text{ kg}}{\text{pounds}} = `r 185*0.453592` \text{ kg}
+\end{equation}
+
+\begin{equation}
+71 \text{ inches} \times \frac{2.54 \text{ cm}}{\text{inches}}\times \frac{1 \text {m}}{100 \text{ cm}} = `r 71*2.54/100` \text{ m}
+\end{equation}
+
+</div>
+
+____________________
+
+To read tabular data from the internet, one might use the `read.table()` function or the `fread()` function from the `data.table` package.  The general structure to read data from the internet is to provide the URL in the `file` or `input` arguments of the `read.table()` or `fread()` functions, respectively.
+
+```{r, eval = FALSE}
+# Example structure
+DF1 <- read.table(file = "http://some.url.com")
+# load data.table package
+library(data.table)
+DF2 <- fread(input = "http://some.url.com")
+```
+
+____________________
+
+1. Read the original data from <http://jse.amstat.org/datasets/fat.dat.txt> into your current R session.  Specifically, start by using the `fread()` function from the `data.table` package to read the data from <http://jse.amstat.org/datasets/fat.dat.txt> into an object named `bodyfat`.  The data dictionary for [http://jse.amstat.org/datasets/fat.dat.txt](http://jse.amstat.org/datasets/fat.dat.txt) is available at [http://jse.amstat.org/datasets/fat.txt](http://jse.amstat.org/datasets/fat.txt).  
+Pass the following vector of names to the `col.names` argument of `fread()`: 
+`c("case", "brozek", "siri", "density", "age", "weight_lbs", "height_in", "bmi", "fat_free_weight",` 
+`"neck_cm", "chest_cm", "abdomen_cm", "hip_cm", "thigh_cm", "knee_cm", "ankle_cm", "biceps_cm",` `"forearm_cm", "wrist_cm")`.   
+
+```{r, label = "readin"}
+# Type your code and comments inside the code chunk
+# Obtaining the original data
+
+
+
+```
+
+____________________
+
+
+2. Use the `read.table()` function to read the data from <http://jse.amstat.org/datasets/fat.dat.txt> into an object named `bodyfat2`.  Pass the same vector created in Problem 1 to the `col.names` argument of `read.table()`.  
+  
+```{r, label = "readin2"}
+# Type your code and comments inside the code chunk
+# Obtaining the original data
+
+
+
+```
+
+
+____________________
+
+
+The basic structure of a function in R is
+
+```{r, eval = FALSE}
+function_name <- function(argument1, argument2, ...){
+  expression
+}
+```
+
+The function `curve()` draws a curve corresponding to a function of the interval `[from, to]`.  For example, to draw the function $y = x^2$ from -3 to 3 use the following code to obtain Figure \@ref(fig:quad).
+
+```{r, label = "quad", fig.cap = "Using the function `curve()` to draw a quadratic function"}
+quad <- function(x){x^2}
+curve(quad, from = -3, to = 3)
+```
+To superimpose a function on an open graphics device with `curve()`, use the argument `add = TRUE`.  For example, to graph  $y = x^2$ with a blue line and $y = 4 + \sin(8x)$ with a red line from $-\pi$ to $\pi$, use the following code:
+
+
+```{r}
+quad <- function(x){x^2}
+curve(quad, from = -pi, to = pi, col = "blue", ylab = "f(x)")
+nsin <- function(x){4 + sin(8*x)}
+curve(nsin, add = TRUE, col = "red")
+```
+
+____________________
+  
+3. Graph the relationship between `brozek` and `density` given in Equation \@ref(eq:brozek) with a blue line as well as the relationship between `siri` and `density` given in Equation \@ref(eq:siri) with a red line.  First, define functions `fb` and `fs` for Equations \@ref(eq:brozek) and \@ref(eq:siri), respectively.  Use the function `curve()` to draw Equations \@ref(eq:brozek) and \@ref(eq:siri) on the same graphics device for density values between 1.0 $\text{gm/cm}^3$ and 1.10 $\text{gm/cm}^3$.
+
+```{r}
+# Type your code and comments inside the code chunk
+# Functions fb and fs 
+fb <- function(density){(457/density) - 414.2}
+fs <- function(density){(495/density) - 450}
+
+
+```
+
+____________________
+
+Code to construct the requested graph using `ggplot2` code is given below and the result is visible in Figure \@ref(fig:sl).
+
+
+
+
+```{r, label = "sl", fig.cap = "Realtionship between bodyfat and density according to Brozek and Siri definitions"}
+library(ggplot2)
+p <- ggplot(data = data.frame(x = c(1, 1.1), y = c(0, 50)), aes(x = x, y = y)) 
+p + stat_function(fun = fb, color = "blue") +
+    stat_function(fun = fs, color = "red") +
+    labs(x = expression(paste("density in ", gm/cm^3)), y = "bodyfat") +
+    theme_bw()
+```
+
+
+4.  How would you characterize the theoretical relationship given in Equations \@ref(eq:brozek) and \@ref(eq:siri)?
+
+<div id="answer">
+Type your answer here.
+
+
+</div>
+  
+____________________
+
+Since the relationship between body fat and density for both Equations \@ref(eq:brozek) and \@ref(eq:siri) is linear, one way to check for unusual observations is to plot the actual values for `brozek` versus `density`  or `siri` versus `density` using the data stored in `bodyfat` or `bodyfat2`.  Points that do not fall along a straight line should be scrutinized for possible data entry errors or other possible explanations.
+
+The **plotly** package allows the user to create interactive graphs or to convert **ggplot2** graphs to **plotly** graphs using the `ggplotly()` function.  Given a data frame say `DF` with variables `X` and `Y`, the following template code will create an interactive **plotly** scatterplot.
+
+```{r, eval = FALSE}
+library(plotly)
+library(ggplot2)
+# Create ggplot scatterplot named p
+p <- ggplot(data = DF, aes(x = X, y = Y)) + 
+  geom_point()
+# Convert ggplot scatterplot to plotly with ggplotly()
+p2 <- ggplotly(p)
+# Display graph
+p2
+```
+
+Consider an interactive scatterplot showing the distance required to stop for vehicles traveling at different speeds using the `cars` data frame.
+
+```{r}
+library(plotly)
+library(ggplot2)
+# Create ggplot scatterplot named p
+p <- ggplot(data = cars, aes(x = speed, y = dist)) + 
+  geom_point()
+# Convert ggplot scatterplot to plotly with ggplotly()
+p2 <- ggplotly(p)
+# Display graph
+p2
+```
+
+
+
+_________________
+
+
+
+5. Create interactive `plotly` scatterplots of `siri` versus `density` with `case` mapped to `color`, `weight_lbs` versus `height_in` with `case` mapped to `color`, and `ankle_cm` versus `weight_lbs` with `case` mapped to `color` to help identify potential outliers. Identify the case numbers for the outliers from your three plots.  
+    
+```{r, label = "itp1", fig.cap = "Plot of `siri` versus `density`"}
+# Type your code and comments inside the code chunk
+# Creating interactive scatterplot of siri versus density
+
+# Change code below to your plot
+ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
+  geom_point()
+```
+
+
+```{r, label = "itp2", fig.cap = "Plot of `weight_lbs` versus `height_in`"}
+# Type your code and comments inside the code chunk
+# Creating interactive scatterplot of weight_lbs versus height_in
+
+# Change code below to your plot
+ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
+  geom_point()
+```
+   
+```{r, label = "itp3", fig.cap = "Interactive scatterplot of `ankle_cm` versus `weight_lbs`"}
+# Type your code and comments inside the code chunk
+# Creating interactive scatterplot of ankle_cm versus weight_lbs
+
+# Change code below to your plot
+ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
+  geom_point()
+```   
+   
+     
+<div id="answer">
+Type your complete sentence answer here using inline R code and delete this comment. 
+
+
+</div>     
+     
+_____________________
+
+6.  Create a subset of the `bodyfat` data frame named `BF` consisting only of the cases identified as outliers in Problem 5.  Use equation \@ref(eq:siri) to create a new variable in `BF` named `density_C` (computed density) based on the reported `siri` values.  Use equation \@ref(eq:BMI) to reverse engineer the computed height in inches based on the values in `weight_lbs` and `bmi` using the conversion factors given at the start of the lab.  Store the computed heights in inches in a variable named `height_in_C`.  Use the verb `mutate` from the **dplyr** package to create both `density_C` and `height_in_C`.  Show the values of the selected outliers for columns `case`, `density_C`, `height_in`, `height_in_C`, and `ankle_cm`.  What do you notice about the `density` and `density_C` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp1)?  What do you notice about the `height_in` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp2)? What do you notice about the `ankle_cm` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp3)?
+      
+```{r}
+# Type your code and comments inside the code chunk
+# Isolating points of interest
+ 
+
+```
+    
+<div id="answer">
+Type your complete sentence answer here using inline R code and delete this comment.
+
+
+
+</div>
+
+___________________
+      
+7. Change the reported `density` values of `bodyfat` based on your answers from Problem 6.  Change the `height_in` value for case 42 to the value you reverse engineered in Problem 6 rounding to the nearest half inch.       
+      
+```{r}
+# Type your code and comments inside the code chunk
+# Updating computed bodyfat values and bmi measurements
+# Replacing identified typos of density
+
+# Replacing identified typos in height_in
+
+# Replacing identified typos in ankle_cm
+ 
+
+```
+
+_____________________
+      
+8.  Create variables named `siri_C`, `brozek_C`, and `bmi_C`, that compute body-fat values rounded to one decimal place according to equations \@ref(eq:siri), \@ref(eq:brozek), and \@ref(eq:BMI), respectively.  Replace the values in `siri` and `brozek` with the computed values in `siri_C` and `brozek_C` for case 182.
+
+```{r}
+# Type your code and comments inside the code chunk
+ 
+
+
+```
+
+______________________
+
+9.  Consider differences between `brozek` and `brozek_C` as well as differences between `siri` and `siri_C` greater than 0.11 to be some type of data entry problem.  Use the verbs `filter()` and `select()` to show the values for `case`, `siri`, `siri_C`, `brozek`, `brozek_C`, and `density` that are considered data entry problems. If both the computed value for siri and brozek differ from the reported values of siri and brozek, it is likely a data entry problem with the density value. If one of either siri or brozek agrees with its computed value, the one that does not agree with the computed value is likely a data entry problem.  Which cases seem to have data entry problems and for what reasons?     
+        
+```{r}
+# Type your code and comments inside the code chunk
+# Identifying bodyfat typos for brozek and siri
+
+```
+
+<div id="answer">
+Type your complete sentence answer here using inline R code and delete this comment.
+
+
+
+</div>
+
+_______________________
+
+10. Fix any data entry errors you identified in Problem 9 in the `bodyfat` data frame.  Make sure to update the `siri_C`, `brozek_C`, and `bmi_C` variables in `bodyfat` using your corrected values from Problem 9.  Write code to verify that there are no differences between `brozek` and `brozek_C` or any differences between `siri` and `siri_C` greater than 0.11.  
+
+```{r}
+# Type your code and comments inside the code chunk
+# Replacing bodyfat typos for brozek and siri
+
+
+# Updating siri_C, brozek_C, and bmi_C
+
+
+# Checking for typos according to given criteria
+
+```
+
+__________
+
+11.  Create interactive plotly scatterplots of `siri_C` versus `density` with `case` mapped to `color` and `brozek_C` versus `density` with `case` mapped to `color` using the modified `bodyfat` data frame.  Superimpose equations \@ref(eq:siri) and \@ref(eq:brozek) over their corresponding scatterplots. Comment on the scatterplots. 
+
+```{r}
+# interactive plotly scatterplot siri_C vs. density
+
+# Change code below to your plot
+ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
+  geom_point()
+```
+
+```{r}
+# interactive plotly scatterplot brozek_C vs. density
+
+# Change code below to your plot
+ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
+  geom_point()
+```
+
+
+    
+<div id="answer">
+        
+Type your complete sentence answer here using inline R code and delete this comment.
+        
+
+</div>
+  
+_________________
+
+
+12. How many of the values do you think are potentially rounding errors?  Explain your reasoning and show the code you used to identify the errors.
+    
+```{r}
+# Type your code and comments inside the code chunk
+# Number of rounding discrepancies for siri
+
+# Number of rounding discrepancies for brozek
+
+# Number of rounding discrepancies for bmi
+
+```
+    
+<div id="answer">
+Type your complete sentence answer here using inline R code and delete this comment.
+        
+
+</div>
+        
+
+________________
+
+13.  What additional variables might you explore to check the quality of the reported data?
+
+<div id="answer">
+Type your complete sentence answer here using inline R code and delete this comment.
+        
+
+</div>
+       
+
+```{r}
+# Code for graph suggested in 13
+
+# Change code below to your plot
+ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
+  geom_point()
+```
+
+_______________
+
+14.  Create an object named `bodyfatClean` that excludes the variables `brozek`, `siri`, and `bmi` from the `bodyfat` data frame.  Use the function `write.csv()` or `write_csv()` to store the `bodyfatClean` object as a CSV file. 
+
+```{r}
+# writing bodyfat to bodyfatClean.csv
+
+
+```
+
+
+
+________________
+
+<div id="license">
+This material is released under an [Attribution-NonCommercial-ShareAlike 3.0 United States](https://creativecommons.org/licenses/by-nc-sa/3.0/us/) license.  Original author: [Alan T. Arnholt](https://alanarnholt.github.io/)
+</div>
+      
+----------    
+    
+## References
