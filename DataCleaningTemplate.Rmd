@@ -4,7 +4,7 @@ output:
   bookdown::html_document2: 
     highlight: espresso
     theme: spacelab
-author: "Your Name Here"
+author: "Cindy Candelario Jose"
 date: 'Last compiled: `r format(Sys.time(), "%B %d, %Y")`'
 bibliography: 
   - packages.bib
