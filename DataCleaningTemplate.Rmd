@@ -84,8 +84,8 @@ DF1 <- read.table(file = "http://some.url.com")
 # load data.table package
 library(data.table)
 DF2 <- fread(input = "http://some.url.com")
-```
 
+```
 ____________________
 
 1. Read the original data from <http://jse.amstat.org/datasets/fat.dat.txt> into your current R session.  Specifically, start by using the `fread()` function from the `data.table` package to read the data from <http://jse.amstat.org/datasets/fat.dat.txt> into an object named `bodyfat`.  The data dictionary for [http://jse.amstat.org/datasets/fat.dat.txt](http://jse.amstat.org/datasets/fat.dat.txt) is available at [http://jse.amstat.org/datasets/fat.txt](http://jse.amstat.org/datasets/fat.txt).  
@@ -95,9 +95,25 @@ Pass the following vector of names to the `col.names` argument of `fread()`:
 
 ```{r, label = "readin"}
 # Type your code and comments inside the code chunk
-# Obtaining the original data
+# Obtaining the original data 
+library(data.table)
+url <- "http://jse.amstat.org/datasets/fat.dat.txt"
 
+bodyfat <- fread(input = url, col.names = c("case", "brozek", "siri", "density", "age", "weight_lbs", "height_in", "bmi", "fat_free_weight", "neck_cm", "chest_cm", "abdomen_cm", "hip_cm", "thigh_cm", "knee_cm", "ankle_cm", "biceps_cm", "forearm_cm", "wrist_cm"))
 
+if(!dir.exists("./data/")){
+  dir.create("./data/")
+}
+if(!file.exists("./data/fat.dat.txt")){
+  download.file(url, destfile = "./data/fat.dat.txt")
+}
+
+bodyfat <- fread(input = "./data/fat.dat.txt",
+                 col.names = c("case", "brozek", "siri", "density", "age", "weight_lbs",
+                                            "height_in", "bmi", "fat_free_weight", "neck_cm",
+                                            "chest_cm", "abdomen_cm", "hip_cm", "thigh_cm",
+                                            "knee_cm", "ankle_cm", "biceps_cm", "forearm_cm",
+                                            "wrist_cm"))
 
 ```
 
@@ -110,10 +126,19 @@ ____________________
 # Type your code and comments inside the code chunk
 # Obtaining the original data
 
+bodyfat2 <-read.table(file = url,
+                      col.names = c("case", "brozek", "siri", "density", "age", "weight_lbs",
+                                            "height_in", "bmi", "fat_free_weight", "neck_cm",
+                                            "chest_cm", "abdomen_cm", "hip_cm", "thigh_cm",
+                                            "knee_cm", "ankle_cm", "biceps_cm", "forearm_cm",
+                                            "wrist_cm"))
 
+#read from local folder (read.table)
+
+bodyfat2 <- read.table(file = "./data/fat.dat.txt",
+                       col.names = c("case", "brozek", "siri", "density", "age", "weight_lbs", "height_in", "bmi", "fat_free_weight", "neck_cm", "chest_cm", "abdomen_cm", "hip_cm", "thigh_cm", "knee_cm", "ankle_cm", "biceps_cm", "forearm_cm", "wrist_cm"))
 
 ```
-
 
 ____________________
 
@@ -132,13 +157,17 @@ The function `curve()` draws a curve corresponding to a function of the interval
 quad <- function(x){x^2}
 curve(quad, from = -3, to = 3)
 ```
+
 To superimpose a function on an open graphics device with `curve()`, use the argument `add = TRUE`.  For example, to graph  $y = x^2$ with a blue line and $y = 4 + \sin(8x)$ with a red line from $-\pi$ to $\pi$, use the following code:
 
 
 ```{r}
 quad <- function(x){x^2}
+
 curve(quad, from = -pi, to = pi, col = "blue", ylab = "f(x)")
+
 nsin <- function(x){4 + sin(8*x)}
+
 curve(nsin, add = TRUE, col = "red")
 ```
 
@@ -149,18 +178,21 @@ ____________________
 ```{r}
 # Type your code and comments inside the code chunk
 # Functions fb and fs 
+
 fb <- function(density){(457/density) - 414.2}
 fs <- function(density){(495/density) - 450}
 
+curve(fb, from = 1.0, to = 1.10, n = 200,
+      xlab = expression(paste("density in", gm/cm^3)),
+      ylab = " body fat", col = "blue", ylim = c(0,50))
+
+curve(fs, from = 1.0, to = 1.10, n = 200)
 
 ```
 
 ____________________
 
 Code to construct the requested graph using `ggplot2` code is given below and the result is visible in Figure \@ref(fig:sl).
-
-
-
 
 ```{r, label = "sl", fig.cap = "Realtionship between bodyfat and density according to Brozek and Siri definitions"}
 library(ggplot2)
@@ -175,8 +207,7 @@ p + stat_function(fun = fb, color = "blue") +
 4.  How would you characterize the theoretical relationship given in Equations \@ref(eq:brozek) and \@ref(eq:siri)?
 
 <div id="answer">
-Type your answer here.
-
+The relationship between body-fat and density for the Equations (\@ref(eq:brozek) and \@ref(eq:siri)) is a linear relationship and negative. The body fat linearly decreases as the density increases. 
 
 </div>
   
@@ -199,7 +230,7 @@ p2
 ```
 
 Consider an interactive scatterplot showing the distance required to stop for vehicles traveling at different speeds using the `cars` data frame.
-
+ 
 ```{r}
 library(plotly)
 library(ggplot2)
@@ -211,12 +242,7 @@ p2 <- ggplotly(p)
 # Display graph
 p2
 ```
-
-
-
 _________________
-
-
 
 5. Create interactive `plotly` scatterplots of `siri` versus `density` with `case` mapped to `color`, `weight_lbs` versus `height_in` with `case` mapped to `color`, and `ankle_cm` versus `weight_lbs` with `case` mapped to `color` to help identify potential outliers. Identify the case numbers for the outliers from your three plots.  
     
@@ -225,8 +251,13 @@ _________________
 # Creating interactive scatterplot of siri versus density
 
 # Change code below to your plot
-ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
-  geom_point()
+sdplot <- ggplot(data = bodyfat, aes(x = density, y = siri, color = case)) +
+  geom_point() +
+  theme_bw()
+sdplot
+
+sdp <- ggplotly(sdplot)
+sdp
 ```
 
 
@@ -235,8 +266,14 @@ ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) +
 # Creating interactive scatterplot of weight_lbs versus height_in
 
 # Change code below to your plot
-ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
-  geom_point()
+whplot <- ggplot(data = bodyfat, aes(x = height_in, y = weight_lbs, color = case)) +
+  geom_point() +
+  theme_bw()
+whplot
+
+whp <- ggplotly(whplot)
+
+whp
 ```
    
 ```{r, label = "itp3", fig.cap = "Interactive scatterplot of `ankle_cm` versus `weight_lbs`"}
@@ -244,32 +281,57 @@ ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) +
 # Creating interactive scatterplot of ankle_cm versus weight_lbs
 
 # Change code below to your plot
-ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
-  geom_point()
+
+awplot <- ggplot(data = bodyfat, aes(x = weight_lbs, y = ankle_cm, color = case)) +
+  geom_point() + 
+  theme_bw()
+awplot
+
+awp <- ggplotly(awplot)
+
+awp
 ```   
    
      
 <div id="answer">
-Type your complete sentence answer here using inline R code and delete this comment. 
 
+There is a total of 9 outliers in the three plots combined. The case outliers in the `siri` versus `density` plot are 216, 96, 76, 48, 182. The case outliers in the `weight_lbs` versus `height_in` are 42 and 39. The case outliers in the `ankle_cm` versus `weight_lbs` are 86, 31, and 39.
 
 </div>     
      
 _____________________
 
-6.  Create a subset of the `bodyfat` data frame named `BF` consisting only of the cases identified as outliers in Problem 5.  Use equation \@ref(eq:siri) to create a new variable in `BF` named `density_C` (computed density) based on the reported `siri` values.  Use equation \@ref(eq:BMI) to reverse engineer the computed height in inches based on the values in `weight_lbs` and `bmi` using the conversion factors given at the start of the lab.  Store the computed heights in inches in a variable named `height_in_C`.  Use the verb `mutate` from the **dplyr** package to create both `density_C` and `height_in_C`.  Show the values of the selected outliers for columns `case`, `density_C`, `height_in`, `height_in_C`, and `ankle_cm`.  What do you notice about the `density` and `density_C` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp1)?  What do you notice about the `height_in` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp2)? What do you notice about the `ankle_cm` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp3)?
+6. Create a subset of the `bodyfat` data frame named `BF` consisting only of the cases identified as outliers in Problem 5.  Use equation \@ref(eq:siri) to create a new variable in `BF` named `density_C` (computed density) based on the reported `siri` values.  Use equation \@ref(eq:BMI) to reverse engineer the computed height in inches based on the values in `weight_lbs` and `bmi` using the conversion factors given at the start of the lab.  Store the computed heights in inches in a variable named `height_in_C`.  Use the verb `mutate` from the **dplyr** package to create both `density_C` and `height_in_C`.  Show the values of the selected outliers for columns `case`, `density_C`, `height_in`, `height_in_C`, and `ankle_cm`.  What do you notice about the `density` and `density_C` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp1)?  What do you notice about the `height_in` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp2)? What do you notice about the `ankle_cm` values in `BF` for the scatterplot you created in Figure \@ref(fig:itp3)?
+
       
 ```{r}
 # Type your code and comments inside the code chunk
 # Isolating points of interest
- 
+library(dplyr)
 
-```
+BF <- bodyfat %>%
+   filter(case == 216 |
+           case == 76 |
+           case == 96 |
+           case == 48 |
+           case == 182 |
+           case == 39 |
+           case == 42 |
+           case == 86 |
+           case == 31 |
+           case == 39)
+  
+BF <- BF %>%
+  mutate(density_C = (495/(siri + 450)),
+         weight_KG = (weight_lbs * 0.453592),
+         height_in_C = (sqrt(weight_KG/bmi)*(100/2.54))) %>%
+  select('case', 'density_C', 'density', 'height_in', 'height_in_C', 'ankle_cm') 
+BF
+``` 
     
 <div id="answer">
-Type your complete sentence answer here using inline R code and delete this comment.
 
-
+The calculated densities values for the `BF` plot are slightly higher than the provided `density` values. The difference is likely due to rounding.
 
 </div>
 
@@ -281,12 +343,20 @@ ___________________
 # Type your code and comments inside the code chunk
 # Updating computed bodyfat values and bmi measurements
 # Replacing identified typos of density
+bodyfat$density[bodyfat$case == "96"] <- 1.0590501 
+bodyfat$density[bodyfat$case == "182"] <- 1.1000000
+bodyfat$density[bodyfat$case == "76"] <- 1.0565635  
+bodyfat$density[bodyfat$case == "216"] <- 0.9949749 
+bodyfat$density[bodyfat$case == "48"] <- 1.0864794 
 
 # Replacing identified typos in height_in
 
+bodyfat$height_in[bodyfat$case == "42"] <- 69.40
+
 # Replacing identified typos in ankle_cm
  
-
+bodyfat$ankle_cm[bodyfat$case == "31"] <- 23.9
+bodyfat$ankle_cm[bodyfat$case == "86"] <- 23.7
 ```
 
 _____________________
@@ -295,9 +365,18 @@ _____________________
 
 ```{r}
 # Type your code and comments inside the code chunk
- 
+  
+bmi_C <- bodyfat$weight_lbs/((bodyfat$height_in*0.0254)^2)
+  
+num8 <- bodyfat %>%
+  filter(case == 182) %>%
+  mutate(siri_C = (495/density)-450,
+         brozek_C = (457/density)-414.2) %>%
+  select(case, siri_C, brozek_C)
+round(num8, 1)
 
-
+bodyfat$siri[bodyfat$case == "182"] <- 0
+bodyfat$brozek[bodyfat$case == "182"] <- 1.3
 ```
 
 ______________________
@@ -308,12 +387,26 @@ ______________________
 # Type your code and comments inside the code chunk
 # Identifying bodyfat typos for brozek and siri
 
+bodyfat <- bodyfat %>%
+  mutate(siri_C = round(495 / density - 450, 1),
+         brozek_C = round(457 / density- 414.2, 1),
+         siri_diff = abs(siri_C - siri),
+         brozek_diff = abs(brozek_C- brozek))
+
+bodyfat_diff <- bodyfat %>%
+  filter(siri_diff > 0.11 | brozek_diff > 0.11) %>%
+  select('case', 'siri', 'siri_C', 'brozek', 'brozek_C', 'density', 'siri_diff', 'brozek_diff')
+
+bodyfat_diff
 ```
 
 <div id="answer">
-Type your complete sentence answer here using inline R code and delete this comment.
 
+For density, the cases 6 and 237 have issues with data entry. 
 
+For siri, the cases 6, 169, and 200 have issues with data entry. 
+
+For brozek, the cases 11, 33, 49, 98, 152, 169, 235, and 237 have issues with data entry. 
 
 </div>
 
@@ -325,13 +418,38 @@ _______________________
 # Type your code and comments inside the code chunk
 # Replacing bodyfat typos for brozek and siri
 
+bodyfat$siri[bodyfat$case == 6] <- 21.338793
+bodyfat$siri[bodyfat$case == 169] <- 36.247544	
+bodyfat$siri[bodyfat$case == 200] <- 23.140891
+
+bodyfat$brozek[bodyfat$case == 6] <- 20.955209
+bodyfat$brozek[bodyfat$case == 11] <- 7.775993
+bodyfat$brozek[bodyfat$case == 33] <- 12.145741
+bodyfat$brozek[bodyfat$case == 49] <- 13.782768
+bodyfat$brozek[bodyfat$case == 98] <- 11.708667
+bodyfat$brozek[bodyfat$case == 152] <- 19.304079
+bodyfat$brozek[bodyfat$case == 169] <- 34.719450
+bodyfat$brozek[bodyfat$case == 235] <- 25.096357
+bodyfat$brozek[bodyfat$case == 237] <- 24.211358
 
 # Updating siri_C, brozek_C, and bmi_C
 
+bodyfat <- bodyfat %>%
+  mutate(siri_C = round(495 / density - 450, 1),
+         brozek_C = round(457 / density- 414.2, 1),
+         siri_diff = abs(siri_C - siri),
+         brozek_diff = abs(brozek_C- brozek))
 
 # Checking for typos according to given criteria
 
+bodyfat_diff2 <- subset(bodyfat) %>%
+               filter(siri_diff > 0.11 | brozek_diff > 0.11) %>%
+  select('case', 'siri', 'siri_C', 'brozek', 'brozek_C', 'density', 'siri_diff', 'brozek_diff')
+
+bodyfat_diff2
 ```
+
+__________
 
 __________
 
@@ -341,24 +459,27 @@ __________
 # interactive plotly scatterplot siri_C vs. density
 
 # Change code below to your plot
-ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
-  geom_point()
+newplot <- ggplot(data = bodyfat, aes(x = density, y = siri_C, color = case)) + 
+  geom_point() + 
+  theme_bw()
+ggplotly(newplot)
 ```
 
 ```{r}
 # interactive plotly scatterplot brozek_C vs. density
 
 # Change code below to your plot
-ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
-  geom_point()
+newplot2 <- ggplot(data = bodyfat, aes(x = density, y = brozek_C, color = case)) + 
+  geom_point() + 
+  theme_bw()
+ggplotly(newplot2)
 ```
 
 
     
 <div id="answer">
-        
-Type your complete sentence answer here using inline R code and delete this comment.
-        
+
+After modifying the `bodyfat` dataset, there are no outliers in either plot.
 
 </div>
   
@@ -371,15 +492,20 @@ _________________
 # Type your code and comments inside the code chunk
 # Number of rounding discrepancies for siri
 
+sum(bodyfat$siri_C != bodyfat$siri)
+
 # Number of rounding discrepancies for brozek
+
+sum(bodyfat$brozek_C != bodyfat$brozek)
 
 # Number of rounding discrepancies for bmi
 
+sum(bodyfat$bmi_C != bodyfat$bmi)
 ```
     
 <div id="answer">
-Type your complete sentence answer here using inline R code and delete this comment.
-        
+
+There are 32 rounding errors for `siri`, 46 rounding errors for `brozek`, and 0 for `bmi`.
 
 </div>
         
@@ -389,18 +515,18 @@ ________________
 13.  What additional variables might you explore to check the quality of the reported data?
 
 <div id="answer">
-Type your complete sentence answer here using inline R code and delete this comment.
-        
+
+The computed values for `brozek` and `siri` can be explored to check the quality of the reported data. The relationship is explored through a scatterplot.
 
 </div>
        
 
 ```{r}
-# Code for graph suggested in 13
-
 # Change code below to your plot
-ggplot(data = data.frame(x = 1, y = 1), aes(x = x, y = y)) + 
-  geom_point()
+newplot3 <- ggplot(data = bodyfat, aes(x = brozek_C, y = siri_C, color = case)) + 
+  geom_point() +
+  theme_bw()
+ggplotly(newplot3)
 ```
 
 _______________
@@ -410,7 +536,11 @@ _______________
 ```{r}
 # writing bodyfat to bodyfatClean.csv
 
+bodyfatClean <- bodyfat[, -c("brozek", "siri", "bmi")]
+bodyfatClean
 
+write.csv(bodyfatClean, "./bodyfatClean.csv",
+          row.names = FALSE)
 ```
 
 
